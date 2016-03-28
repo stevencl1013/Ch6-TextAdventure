@@ -21,7 +21,12 @@ public class Game
 {
     private Parser parser;
     private Room currentRoom;
-    private boolean hasMasterKey = false;
+    private int masterKeyRoom;
+    private boolean hasMasterKey;
+    private boolean hasKnife;
+    private boolean hasGun;
+    private boolean canSwim;
+    private Room[] rooms;
         
     /**
      * Create the game and initialise its internal map.
@@ -37,9 +42,13 @@ public class Game
      */
     private void createRooms()
     {
-        Room[] rooms = new Room[15];
+        rooms = new Room[15];
         Random rand = new Random();
-        int masterKeyRoom = 11;
+        masterKeyRoom = 11;
+        hasMasterKey = false;
+        canSwim = false;
+        hasGun = false;
+        hasKnife = false;
         while(masterKeyRoom == 11) // randomly set master key room to any room except the neighbor's house.
         {
             masterKeyRoom = rand.nextInt(15);
@@ -65,6 +74,7 @@ public class Game
         // initialise room exits
         rooms[0].setExit("east", rooms[1]);
         rooms[0].setExit("south", rooms[2]);
+        rooms[1].setExit("west", rooms[0]);
         rooms[1].setExit("south", rooms[7]);
         rooms[2].setExit("north", rooms[0]);
         rooms[2].setExit("south", rooms[5]);
@@ -119,8 +129,8 @@ public class Game
     private void printWelcome()
     {
         System.out.println();
-        System.out.println("Welcome to the World of Zuul!");
-        System.out.println("World of Zuul is a new, incredibly boring adventure game.");
+        System.out.println("Welcome to the Zombie Apocalypse!");
+        System.out.println("Kill as many zombies as you can, without getting killed yourself.");
         System.out.println("Type '" + CommandWord.HELP + "' if you need help.");
         System.out.println();
         System.out.println(currentRoom.getLongDescription());
@@ -166,9 +176,6 @@ public class Game
      */
     private void printHelp() 
     {
-        System.out.println("You are lost. You are alone. You wander");
-        System.out.println("around at the university.");
-        System.out.println();
         System.out.println("Your command words are:");
         parser.showCommands();
     }
@@ -196,6 +203,32 @@ public class Game
         else {
             currentRoom = nextRoom;
             System.out.println(currentRoom.getLongDescription());
+            if(currentRoom.equals(rooms[1]) && (!canSwim))
+            {
+                System.out.println("You cannot swim, you have drowned to death.");
+                // KILL PLAYER
+            }
+            if(currentRoom.equals(rooms[8]) || currentRoom.equals(rooms[14]))
+            {
+                System.out.println("Would you like to take a pill?");
+            }
+            if(currentRoom.equals(rooms[6]))
+            {
+                System.out.println("You now have knife.");
+                hasKnife = true;
+            }
+            
+            if(currentRoom.equals(rooms[masterKeyRoom]))
+            {
+                masterKeyRoom = -1;
+                hasMasterKey = true;
+                System.out.println("You have acquired the master key.");
+                System.out.println("You can now access the gun in the bedroom,");
+                System.out.println("the ammo in the basement, and your neighbor's house.");
+                rooms[9].setExit("south", rooms[11]);
+                rooms[11].setExit("north", rooms[9]);
+            }
+            
         }
     }
 
