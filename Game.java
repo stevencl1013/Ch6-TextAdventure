@@ -1,6 +1,7 @@
 import java.util.Random;
 import java.util.ArrayList;
-
+import java.awt.*;
+import javax.swing.*;
 /**
  *  This class is the main class of the "World of Zuul" application. 
  *  "World of Zuul" is a very simple, text based adventure game.  Users 
@@ -31,6 +32,7 @@ public class Game
     private boolean hasMasterKey;
     private boolean hasKnife;
     private boolean hasGun;
+    private boolean hasMap;
     private boolean canSwim;
     private boolean finished;
     private boolean omniscient; // lets character see how many zombies are in each room.
@@ -60,7 +62,12 @@ public class Game
         canSwim = false;
         hasGun = false;
         hasKnife = false;
+        hasMap = false;
         zombies = new ArrayList<Zombie>();
+        for(int i = 0; i < rooms.length; i++)
+        {
+            rooms[i].setNumZombies(0);
+        }
         while(masterKeyRoom == 11) // randomly set master key room to any room except the neighbor's house.
         {
             masterKeyRoom = rand.nextInt(15);
@@ -78,7 +85,6 @@ public class Game
     private void createRooms()
     {
         rooms = new Room[15];
-        resetValues();
         // create the rooms
         hell = new Room("Hell");
         rooms[0] = new Room("Woods");
@@ -127,7 +133,8 @@ public class Game
         rooms[13].setExit("downstairs", rooms[5]);
         rooms[13].setExit("east", rooms[14]);
         rooms[14].setExit("west", rooms[13]);
-
+        
+        resetValues();
         resetRoom();
     }
 
@@ -147,7 +154,7 @@ public class Game
             Command command = parser.getCommand();
             processCommand(command);
         }
-        System.out.println("Score: " + kills);
+        System.out.println("Kills: " + kills);
         System.out.println("Steps: " + steps);
         System.out.println("Thank you for playing.  Good bye.");
     }
@@ -376,13 +383,18 @@ public class Game
                     System.out.println("If you had a gun, you would be able to add ammo from this room.");
                 }
             }
+            else if(currentRoom.equals(rooms[11]) && !hasMap)
+            {
+                System.out.println("Here, you have found a map!");
+                displayMap();
+            }
             
             if(omniscient)
             {
                 for(int i = 0; i < rooms.length; i++)
-                {
                     System.out.println("In the "+rooms[i].getShortDescription()+" there are "+rooms[i].getNumZombies()+" zombies.");
-                }
+                if(!hasMasterKey)
+                    System.out.println("The master key is in the "+rooms[masterKeyRoom].getShortDescription());
             }
         }
     }
@@ -401,5 +413,22 @@ public class Game
         else {
             return true;  // signal that we want to quit
         }
+    }
+    
+    private void displayMap()
+    {
+        String fileName = "TextAdventureMap.jpg";
+        ImageIcon icon = new ImageIcon(fileName);
+        JLabel label = new JLabel(icon);
+        JFrame f = new JFrame();
+        f.getContentPane().add(new JScrollPane(label));
+        f.setSize(1000,1000);
+        f.setLocation(200,200);
+        f.setVisible(true);
+    }
+    public static void main (String[] args)
+    {
+        Game game = new Game();
+        game.play();
     }
 }

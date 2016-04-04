@@ -18,7 +18,7 @@ public class Zombie
         location.addZombies(1);
     }
     
-    public void move() // moves zombie to a random room.
+    public void move() // moves zombie to a random bordering room, or stays still.
     {
         String direction;
         int num;
@@ -27,7 +27,7 @@ public class Zombie
         Room nextRoom;
         while(!done)
         {
-            num = rand.nextInt(6);
+            num = rand.nextInt(7);
             switch(num)
             {
                 case 0: direction = "north";
@@ -42,8 +42,7 @@ public class Zombie
                     break;
                 case 5: direction = "downstairs";
                     break;
-                default: direction = "north";
-                    break;
+                default: return;
             }
             nextRoom = location.getExit(direction);
             if(nextRoom != null)
