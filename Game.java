@@ -1,4 +1,5 @@
 import java.util.Random;
+import java.util.ArrayList;
 
 /**
  *  This class is the main class of the "World of Zuul" application. 
@@ -22,11 +23,20 @@ public class Game
     private Parser parser;
     private Room currentRoom;
     private int masterKeyRoom;
+    private int totalZombies;
+    private int ammo;
+    private int kills;
+    private int steps;
+    private int timesReloaded;
     private boolean hasMasterKey;
     private boolean hasKnife;
     private boolean hasGun;
     private boolean canSwim;
+    private boolean finished;
+    private boolean omniscient; // lets character see how many zombies are in each room.
     private Room[] rooms;
+    private Room hell; // where all the dead zombies go.
+    private ArrayList<Zombie> zombies;
         
     /**
      * Create the game and initialise its internal map.
@@ -36,6 +46,31 @@ public class Game
         createRooms();
         parser = new Parser();
     }
+    
+    private void resetValues() 
+    {
+        Random rand = new Random();
+        masterKeyRoom = 11;
+        totalZombies = 0;
+        ammo = 0;
+        kills = 0;
+        steps = 0;
+        timesReloaded = 0;
+        hasMasterKey = false;
+        canSwim = false;
+        hasGun = false;
+        hasKnife = false;
+        zombies = new ArrayList<Zombie>();
+        while(masterKeyRoom == 11) // randomly set master key room to any room except the neighbor's house.
+        {
+            masterKeyRoom = rand.nextInt(15);
+        }
+    }
+    
+    private void resetRoom() // puts character back in front yard.
+    {
+        currentRoom = rooms[9];
+    }
 
     /**
      * Create all the rooms and link their exits together.
@@ -43,18 +78,9 @@ public class Game
     private void createRooms()
     {
         rooms = new Room[15];
-        Random rand = new Random();
-        masterKeyRoom = 11;
-        hasMasterKey = false;
-        canSwim = false;
-        hasGun = false;
-        hasKnife = false;
-        while(masterKeyRoom == 11) // randomly set master key room to any room except the neighbor's house.
-        {
-            masterKeyRoom = rand.nextInt(15);
-        }
-      
+        resetValues();
         // create the rooms
+        hell = new Room("Hell");
         rooms[0] = new Room("Woods");
         rooms[1] = new Room("Lake");
         rooms[2] = new Room("Backyard");
@@ -97,12 +123,12 @@ public class Game
         rooms[9].setExit("north", rooms[5]);
         rooms[10].setExit("north", rooms[6]);
         // room 11 is only accessible with master key.
-        rooms[12].setExit("upstairs", rooms[9]);
-        rooms[13].setExit("downstairs", rooms[9]);
+        rooms[12].setExit("upstairs", rooms[5]);
+        rooms[13].setExit("downstairs", rooms[5]);
         rooms[13].setExit("east", rooms[14]);
         rooms[14].setExit("west", rooms[13]);
 
-        currentRoom = rooms[9];  // start game in the front yard.
+        resetRoom();
     }
 
     /**
@@ -110,16 +136,19 @@ public class Game
      */
     public void play() 
     {            
+        resetValues();
+        resetRoom();
         printWelcome();
-
         // Enter the main command loop.  Here we repeatedly read commands and
         // execute them until the game is over.
                 
-        boolean finished = false;
+        finished = false;
         while (! finished) {
             Command command = parser.getCommand();
-            finished = processCommand(command);
+            processCommand(command);
         }
+        System.out.println("Score: " + kills);
+        System.out.println("Steps: " + steps);
         System.out.println("Thank you for playing.  Good bye.");
     }
 
@@ -161,7 +190,7 @@ public class Game
                 break;
 
             case QUIT:
-                wantToQuit = quit(command);
+                finished = true;
                 break;
         }
         return wantToQuit;
@@ -171,7 +200,7 @@ public class Game
 
     /**
      * Print out some help information.
-     * Here we print some stupid, cryptic message and a list of the 
+     * Here we print a list of the 
      * command words.
      */
     private void printHelp() 
@@ -193,34 +222,102 @@ public class Game
         }
 
         String direction = command.getSecondWord();
-
+        Random rand = new Random();
+        int num;
         // Try to leave current room.
         Room nextRoom = currentRoom.getExit(direction);
 
-        if (nextRoom == null) {
+        if (nextRoom == null) 
+        {
             System.out.println("There is no door!");
         }
-        else {
+        else 
+        {
+            steps++;
             currentRoom = nextRoom;
             System.out.println(currentRoom.getLongDescription());
-            if(currentRoom.equals(rooms[1]) && (!canSwim))
+            for(Zombie zombie : zombies) // move every zombie
             {
-                System.out.println("You cannot swim, you have drowned to death.");
-                // KILL PLAYER
+                if(!zombie.getRoom().equals(hell))
+                    zombie.move();
             }
-            if(currentRoom.equals(rooms[8]) || currentRoom.equals(rooms[14]))
+            for(int i = 0; i < rooms.length; i++) // On each move, each room has a 1/4 chance of adding a new zombie.
             {
-                System.out.println("Would you like to take a pill?");
+                num = rand.nextInt(4);
+                if(num == 0 && steps > 2)
+                {
+                    zombies.add(new Zombie(rooms[i]));
+                }
             }
-            if(currentRoom.equals(rooms[6]))
+            if(currentRoom.getNumZombies() > 3) // decides what to do based on number of zombies in room.
             {
-                System.out.println("You now have knife.");
-                hasKnife = true;
+                if(currentRoom.getNumZombies() > ammo)
+                {
+                    finished = true;
+                    System.out.println("There are more zombies in this room than you can kill.");
+                    return;
+                }
+                else
+                {
+                    System.out.println("You have killed all "+currentRoom.getNumZombies()+" zombies in this room with your gun.");
+                    for(Zombie zombie : zombies)
+                    {
+                        if(zombie.getRoom().equals(currentRoom))
+                        {
+                            ammo--;
+                            zombie.setRoom(hell);
+                            currentRoom.addZombies(-1);
+                            kills++;
+                        }
+                    }
+                    System.out.println("You now have " + ammo + " bullets.");
+                }
+            }
+            else if(currentRoom.getNumZombies() == 0)
+            {
+                System.out.println("You're lucky, there are no zombies in this room.");
+            }
+            else
+            {
+                if(hasKnife)
+                {
+                    System.out.println("You have killed all "+currentRoom.getNumZombies()+" zombies in this room with your knife.");
+                    for(Zombie zombie : zombies)
+                    {
+                        if(zombie.getRoom().equals(currentRoom))
+                        {
+                            zombie.setRoom(hell);
+                            currentRoom.addZombies(-1);
+                            kills++;
+                        }
+                    }
+                }
+                else if(ammo >= currentRoom.getNumZombies())
+                {
+                    System.out.println("You have killed all "+currentRoom.getNumZombies()+" zombies in this room with your gun.");
+                    for(Zombie zombie : zombies)
+                    {
+                        if(zombie.getRoom().equals(currentRoom))
+                        {
+                            ammo--;
+                            zombie.setRoom(hell);
+                            currentRoom.addZombies(-1);
+                            kills++;
+                        }
+                    }
+                    System.out.println("You now have " + ammo + " bullets.");
+                }
+                else
+                {
+                    finished = true;
+                    System.out.println("There are more zombies in this room than you can kill.");
+                    return;
+                }
+                    
             }
             
-            if(currentRoom.equals(rooms[masterKeyRoom]))
+            if(currentRoom.equals(rooms[masterKeyRoom]) && !hasMasterKey)
             {
-                masterKeyRoom = -1;
                 hasMasterKey = true;
                 System.out.println("You have acquired the master key.");
                 System.out.println("You can now access the gun in the bedroom,");
@@ -228,7 +325,65 @@ public class Game
                 rooms[9].setExit("south", rooms[11]);
                 rooms[11].setExit("north", rooms[9]);
             }
+            if(currentRoom.equals(rooms[1]) && (!canSwim))
+            {
+                System.out.println("You cannot swim, you have drowned to death.");
+                finished = true;
+            }
+            else if(currentRoom.equals(rooms[8]) || currentRoom.equals(rooms[14]))
+            {
+                System.out.println("Since you came to the bathroom, you must take a pill.");
+                int pillNum = rand.nextInt(3);
+                switch(pillNum)
+                {
+                    case 0: System.out.println("You can now swim!");
+                        canSwim = true;
+                        break;
+                    case 1: System.out.println("Whoops, you took the death pill.");
+                        finished = true;
+                        break;
+                    case 2: System.out.println("You are now omniscient. You can see how many zombies are in each room.");
+                        omniscient = true;
+                        break;
+                }
+            }
+            else if(currentRoom.equals(rooms[6]) && !hasKnife)
+            {
+                System.out.println("You now have a knife.");
+                hasKnife = true;
+            }
+            else if(currentRoom.equals(rooms[13]) && !hasGun && hasMasterKey)
+            {
+                System.out.println("You now have a gun.");
+                hasGun = true;
+            }
+            else if(currentRoom.equals(rooms[12]) && hasMasterKey)
+            {
+                if(hasGun)
+                {
+                    if(timesReloaded < 5)
+                    {
+                        System.out.println("You now have 10 bullets.");
+                        ammo = 10;
+                        timesReloaded++;
+                        System.out.println("You may reload " + (5-timesReloaded) + " more times.");
+                    }
+                    else
+                        System.out.println("Since you have already reloaded 5 times, you may not reload again.");
+                }
+                else
+                {
+                    System.out.println("If you had a gun, you would be able to add ammo from this room.");
+                }
+            }
             
+            if(omniscient)
+            {
+                for(int i = 0; i < rooms.length; i++)
+                {
+                    System.out.println("In the "+rooms[i].getShortDescription()+" there are "+rooms[i].getNumZombies()+" zombies.");
+                }
+            }
         }
     }
 

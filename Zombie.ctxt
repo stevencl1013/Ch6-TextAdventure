@@ -1,0 +1,11 @@
+#BlueJ class context
+comment0.params=room
+comment0.target=Zombie(Room)
+comment0.text=\r\n\ Constructor\ for\ objects\ of\ class\ Zombie\r\n
+comment1.params=
+comment1.target=void\ move()
+comment2.params=
+comment2.target=Room\ getRoom()
+comment3.params=r
+comment3.target=void\ setRoom(Room)
+numComments=4

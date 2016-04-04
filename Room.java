@@ -19,6 +19,7 @@ import java.util.Iterator;
 public class Room 
 {
     private String description;
+    private int numZombies;
     private HashMap<String, Room> exits;        // stores exits of this room.
 
     /**
@@ -31,6 +32,7 @@ public class Room
     {
         this.description = description;
         exits = new HashMap<String, Room>();
+        numZombies = 0;
     }
 
     /**
@@ -76,6 +78,21 @@ public class Room
             returnString += " " + exit;
         }
         return returnString;
+    }
+    
+    public void setNumZombies(int n)
+    {
+        numZombies = n;
+    }
+    
+    public void addZombies(int n)
+    {
+        numZombies += n;
+    }
+    
+    public int getNumZombies()
+    {
+        return numZombies;
     }
 
     /**
