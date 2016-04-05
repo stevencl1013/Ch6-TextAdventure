@@ -259,7 +259,7 @@ public class Game
                 if(currentRoom.getNumZombies() > ammo)
                 {
                     finished = true;
-                    System.out.println("There are "+currentRoom.getNumZombies()+"in this room, more than you can kill.");
+                    System.out.println("There are "+currentRoom.getNumZombies()+" zombies in this room, more than you can kill.");
                     return;
                 }
                 else
