@@ -259,7 +259,7 @@ public class Game
                 if(currentRoom.getNumZombies() > ammo)
                 {
                     finished = true;
-                    System.out.println("There are more zombies in this room than you can kill.");
+                    System.out.println("There are "+currentRoom.getNumZombies()+"in this room, more than you can kill.");
                     return;
                 }
                 else
@@ -315,7 +315,7 @@ public class Game
                 else
                 {
                     finished = true;
-                    System.out.println("There are more zombies in this room than you can kill.");
+                    System.out.println("There are "+currentRoom.getNumZombies()+" zombies in this room, more than you can kill.");
                     return;
                 }
                     
@@ -385,6 +385,7 @@ public class Game
             {
                 System.out.println("Here, you have found a map!");
                 displayMap();
+                hasMap = true;
             }
             
             if(omniscient) // if omniscient, user can see where zombies are and where the master key is.
