@@ -10,16 +10,17 @@ import java.util.Iterator;
  *
  * A "Room" represents one location in the scenery of the game.  It is 
  * connected to other rooms via exits.  For each existing exit, the room 
- * stores a reference to the neighboring room.
+ * stores a reference to the neighboring room. Each room has a number of
+ * zombies in it.
  * 
- * @author  Michael Kölling and David J. Barnes
- * @version 2011.08.10
+ * @author  Steven Lee
+ * @version 4-4-2016
  */
 
 public class Room 
 {
     private String description;
-    private int numZombies;
+    private int numZombies; // stores how many zombies are in the room.
     private HashMap<String, Room> exits;        // stores exits of this room.
 
     /**
@@ -80,16 +81,28 @@ public class Room
         return returnString;
     }
     
+     /**
+     * Sets number of zombies to the given value.
+     * @param direction How many zombies there will be.
+     */
     public void setNumZombies(int n)
     {
         numZombies = n;
     }
     
+     /**
+     * Adds number of zombies to the room. If n is negative, zombies 
+     * are removed from the room.
+     * @param number of zombies to add
+     */
     public void addZombies(int n)
     {
         numZombies += n;
     }
     
+     /**
+     * @return The number of zombies in the room.
+     */
     public int getNumZombies()
     {
         return numZombies;

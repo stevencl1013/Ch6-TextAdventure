@@ -3,20 +3,16 @@ import java.util.ArrayList;
 import java.awt.*;
 import javax.swing.*;
 /**
- *  This class is the main class of the "World of Zuul" application. 
- *  "World of Zuul" is a very simple, text based adventure game.  Users 
- *  can walk around some scenery. That's all. It should really be extended 
- *  to make it more interesting!
+ *  This is a text adventure game, where the player must try to kill as 
+ *  many zombies as possible. To kill zombies, the user must either get
+ *  the knife from the kitchen, or get the gun from the bedroom and ammo
+ *  from the basement. The bathroom contains pills which can make the 
+ *  user able to swim, omniscient, or dead. The gun, ammo, and neighbor's
+ *  house can only be accessed if the master key is found. The neighbor's
+ *  house contains a map. 
  * 
- *  To play this game, create an instance of this class and call the "play"
- *  method.
- * 
- *  This main class creates and initialises all the others: it creates all
- *  rooms, creates the parser and starts the game.  It also evaluates and
- *  executes the commands that the parser returns.
- * 
- * @author  Michael Kölling and David J. Barnes
- * @version 2011.08.10
+ * @author  Steven Lee
+ * @version 4-4-2016
  */
 
 public class Game 
@@ -218,7 +214,9 @@ public class Game
 
     /** 
      * Try to go in one direction. If there is an exit, enter the new
-     * room, otherwise print an error message.
+     * room, otherwise print an error message. Also, generates new zombies
+     * and moves existing zombies. Based on the room, different actions will
+     * occur.
      */
     private void goRoom(Command command) 
     {
@@ -323,7 +321,7 @@ public class Game
                     
             }
             
-            if(currentRoom.equals(rooms[masterKeyRoom]) && !hasMasterKey)
+            if(currentRoom.equals(rooms[masterKeyRoom]) && !hasMasterKey) // if user finds master key
             {
                 hasMasterKey = true;
                 System.out.println("You have acquired the master key.");
@@ -332,16 +330,16 @@ public class Game
                 rooms[9].setExit("south", rooms[11]);
                 rooms[11].setExit("north", rooms[9]);
             }
-            if(currentRoom.equals(rooms[1]) && (!canSwim))
+            if(currentRoom.equals(rooms[1]) && (!canSwim)) // if user enters lake without being able to swim
             {
                 System.out.println("You cannot swim, you have drowned to death.");
                 finished = true;
             }
-            else if(currentRoom.equals(rooms[8]) || currentRoom.equals(rooms[14]))
+            else if(currentRoom.equals(rooms[8]) || currentRoom.equals(rooms[14])) // if user enters a bathroom, he must take a pill
             {
                 System.out.println("Since you came to the bathroom, you must take a pill.");
                 int pillNum = rand.nextInt(3);
-                switch(pillNum)
+                switch(pillNum) // randomly decides what pill will be taken
                 {
                     case 0: System.out.println("You can now swim!");
                         canSwim = true;
@@ -354,17 +352,17 @@ public class Game
                         break;
                 }
             }
-            else if(currentRoom.equals(rooms[6]) && !hasKnife)
+            else if(currentRoom.equals(rooms[6]) && !hasKnife) //if user enters kitchen, he gets the knife.
             {
                 System.out.println("You now have a knife.");
                 hasKnife = true;
             }
-            else if(currentRoom.equals(rooms[13]) && !hasGun && hasMasterKey)
+            else if(currentRoom.equals(rooms[13]) && !hasGun && hasMasterKey) //if user enters bedroom, he gets the gun.
             {
                 System.out.println("You now have a gun.");
                 hasGun = true;
             }
-            else if(currentRoom.equals(rooms[12]) && hasMasterKey)
+            else if(currentRoom.equals(rooms[12]) && hasMasterKey) // if user enters basement, he reloads the gun, if he has one.
             {
                 if(hasGun)
                 {
@@ -383,13 +381,13 @@ public class Game
                     System.out.println("If you had a gun, you would be able to add ammo from this room.");
                 }
             }
-            else if(currentRoom.equals(rooms[11]) && !hasMap)
+            else if(currentRoom.equals(rooms[11]) && !hasMap) // if user enters neighbor's house, he finds the map.
             {
                 System.out.println("Here, you have found a map!");
                 displayMap();
             }
             
-            if(omniscient)
+            if(omniscient) // if omniscient, user can see where zombies are and where the master key is.
             {
                 for(int i = 0; i < rooms.length; i++)
                     System.out.println("In the "+rooms[i].getShortDescription()+" there are "+rooms[i].getNumZombies()+" zombies.");
@@ -415,6 +413,10 @@ public class Game
         }
     }
     
+    
+    /** 
+     * Displays map of the game. Note: I did not write this code myself. 
+     */
     private void displayMap()
     {
         String fileName = "TextAdventureMap.jpg";

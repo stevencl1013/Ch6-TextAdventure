@@ -3,22 +3,27 @@ import java.util.Random;
 /**
  * Write a description of class Zombie here.
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * @author Steven Lee
+ * @version 4-4-2016
  */
 public class Zombie
 {
-    private Room location;
+    private Room location; // room the zombie is in
     /**
-     * Constructor for objects of class Zombie
+     * Create a zombie in given room, and add 1 to that rooms number of zombies.
+     * @param Room zombie is initially in.
      */
-    public Zombie(Room room)
+    public Zombie(Room room) 
     {
         location = room;
         location.addZombies(1);
     }
     
-    public void move() // moves zombie to a random bordering room, or stays still.
+     /**
+     * Randomly lets either move to a neighboring room, or stay where it is,
+     * and update the rooms' number of zombies accordingly.
+     */
+    public void move() 
     {
         String direction;
         int num;
@@ -47,19 +52,26 @@ public class Zombie
             nextRoom = location.getExit(direction);
             if(nextRoom != null)
             {
-                location.addZombies(-1);
+                location.addZombies(-1); // subtract 1 from old room's number of zombies
                 location = nextRoom;
-                location.addZombies(1);
+                location.addZombies(1); // add 1 to new room's number of zombies.
                 done = true;
             }
         }
     }
     
+     /**
+     * @return The room the zombie is currently in.
+     */
     public Room getRoom()
     {
         return location;
     }
     
+     /**
+     * Change the room the zombie is in. Only used for sending zombies to hell.
+     * @param direction The room the zombie will move to.
+     */
     public void setRoom(Room r)
     {
         location = r;

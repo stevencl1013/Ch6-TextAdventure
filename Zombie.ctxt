@@ -1,11 +1,14 @@
 #BlueJ class context
 comment0.params=room
 comment0.target=Zombie(Room)
-comment0.text=\n\ Constructor\ for\ objects\ of\ class\ Zombie\n
+comment0.text=\n\ Create\ a\ zombie\ in\ given\ room,\ and\ add\ 1\ to\ that\ rooms\ number\ of\ zombies.\n\ @param\ Room\ zombie\ is\ initially\ in.\n
 comment1.params=
 comment1.target=void\ move()
+comment1.text=\n\ Randomly\ lets\ either\ move\ to\ a\ neighboring\ room,\ or\ stay\ where\ it\ is,\n\ and\ update\ the\ rooms'\ number\ of\ zombies\ accordingly.\n
 comment2.params=
 comment2.target=Room\ getRoom()
+comment2.text=\n\ @return\ The\ room\ the\ zombie\ is\ currently\ in.\n
 comment3.params=r
 comment3.target=void\ setRoom(Room)
+comment3.text=\n\ Change\ the\ room\ the\ zombie\ is\ in.\ Only\ used\ for\ sending\ zombies\ to\ hell.\n\ @param\ direction\ The\ room\ the\ zombie\ will\ move\ to.\n
 numComments=4
